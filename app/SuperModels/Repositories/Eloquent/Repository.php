@@ -1,122 +1,116 @@
 <?php 
 namespace SuperModels\Repositories\Eloquent;
 
-use SuperModels\Contracts\RepositoryInterface;
+use SuperModels\Repositories\Contracts\RepositoryInterface;
 use SuperModels\Repositories\Contracts\CustomQuerysInterface;
-use SuperModels\Repositories\CustomQuerys\CustomQuerys;
+use SuperModels\Repositories\CustomQuerys\CustomQuerys as Custom;
 
 
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Container\Container as App;
 
-abstract class Repository extends RepositoryInterface, CustomQuerysInterface
+abstract class Repository implements RepositoryInterface
 {
+    /**
+     * @var App
+     */
     private $app;
-    protected $model,
-              $custom,
-              $skipCustom = false;
-
-    public function __construct(App $app, Collection $collection)
-    {
+ 
+    /**
+     * @var
+     */
+    protected $model;
+ 
+    /**
+     * @param App $app
+     * @throws \Bosnadev\Repositories\Exceptions\RepositoryException
+     */
+    public function __construct(App $app) {
         $this->app = $app;
-        $this->custom = $collection;
-        $this->resetScope();
         $this->makeModel();
     }
-
-    public function all($cols = ['*'])
-    {
-        $this->applyCustom();
-        return $this->model->get($cols);
+ 
+    /**
+     * Specify Model class name
+     *
+     * @return mixed
+     */
+    abstract function model();
+ 
+    /**
+     * @param array $columns
+     * @return mixed
+     */
+    public function all($columns = array('*')) {
+        return $this->model->get($columns);
     }
-
-    public function paginate($perPage = 15, $cols = ['*'])
-    {
-        $this->applyCustom();
-        return $this->model->paginate($perPage, $cols);
+ 
+    /**
+     * @param int $perPage
+     * @param array $columns
+     * @return mixed
+     */
+    public function paginate($perPage = 15, $columns = array('*')) {
+        return $this->model->paginate($perPage, $columns);
     }
-
-    public function create(array $data)
-    {
+ 
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public function create(array $data) {
         return $this->model->create($data);
     }
-
-    public function update(array $data, $id, $attribute = 'id')
-    {
-        return $this->model->where($attribute, '=', $id);
+ 
+    /**
+     * @param array $data
+     * @param $id
+     * @param string $attribute
+     * @return mixed
+     */
+    public function update(array $data, $id, $attribute="id") {
+        return $this->model->where($attribute, '=', $id)->update($data);
     }
-
-    public function delete($id)
-    {
+ 
+    /**
+     * @param $id
+     * @return mixed
+     */
+    public function delete($id) {
         return $this->model->destroy($id);
     }
-
-    public function find($id, $cols = ['*'])
-    {
-        $this->applyCustom();
-        return $this->model->find($id, $cols)
+ 
+    /**
+     * @param $id
+     * @param array $columns
+     * @return mixed
+     */
+    public function find($id, $columns = array('*')) {
+        return $this->model->find($id, $columns);
     }
-
-    public function findBy($field, $vals, $cols = ['*'], $attribute)
-    {
-        $this->applyCustom();
-        return $this->model->where($attribute, '=', $vals)->first($cols)
+ 
+    /**
+     * @param $attribute
+     * @param $value
+     * @param array $columns
+     * @return mixed
+     */
+    public function findBy($attribute, $value, $columns = array('*')) {
+        return $this->model->where($attribute, '=', $value)->first($columns);
     }
-
-    abstract function model();
-
-    public function makeModel()
-    {
+ 
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder
+     * @throws RepositoryException
+     */
+    public function makeModel() {
         $model = $this->app->make($this->model());
-
-        if(!model instanceof Model) {
-            throw new Exception("Class {$this->model()} must be an instance of Illuminate\Dataase\Eloquent\Model");
-        }
+ 
+        if (!$model instanceof Model)
+            throw new RepositoryException("Class {$this->model()} must be an instance of Illuminate\\Database\\Eloquent\\Model");
+ 
         return $this->model = $model->newQuery();
-    }
-
-    public function resetScope()
-    {
-        $this->skipCustom(false);
-        return $this;
-    }
-
-    public function skipCustom($status = true)
-    {
-        $this->skipCustom = $status;
-        return $this;
-    }
-
-    public function getCustom()
-    {
-        return $this->custom;
-    }
-
-    public function getByCustom(Custom $custom)
-    {
-        $this->model = $custom->apply($this->model, $this);
-        return $this;
-    }
-
-    public function pushCustom(Custom $custom)
-    {
-        $this->custom->push($custom);
-        return $this;
-    }
-
-    public function applyCustom()
-    {
-        if($this->skipCustom == true) {
-            return true;
-        }
-
-        foreach($this->getCustom() as $custom) {
-            if($custom instanceof Custom) {
-                $this->model = $custom->apply($this->model, $this);
-            }
-        }
-        return $this;
     }
 
 }

@@ -1,6 +1,6 @@
 <?php
 #Bindings
-App::bind('SuperModels\RepositoryPatterns\ArticleInterface','SuperModels\RepositoryPatterns\ArticleRepository');
+// App::bind('SuperModels\Repositories\Contracts\RepositoryInterface','SuperModels\Repositories\Eloquent\Repository');
 
 Route::get('/', ['as'=>'home', 'uses'=> 'PagesController@home']);
 #Route::get('articles/{id}', ['as' => 'article', 'uses' => 'ArticlesController@show']);

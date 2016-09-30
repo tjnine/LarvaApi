@@ -7,14 +7,14 @@ use App\Http\Requests;
 use Illuminate\Database\Eloquent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
-use SuperModels\RepositoryPatterns\ArticleInterface;
+use SuperModels\Repositories\ArticleRepository as Article;
 
 
 class ArticlesController extends Controller
 {
     public $article;
 
-    public function __construct(ArticleInterface $article)
+    public function __construct(Article $article)
     {
     	$this->article = $article;
     	header('content-type: application/json');
@@ -32,7 +32,7 @@ class ArticlesController extends Controller
          //    'articles' => []
          // ];
          
-         $articles = $this->article->getAll();     
+         $articles = $this->article->all();     
        
          // foreach($articles as $article) {
          //     $response['articles'][] = [ 
