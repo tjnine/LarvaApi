@@ -15,7 +15,7 @@ class FilmsExampleController extends Controllers
 
     public function index()
     {
-        #useful for stacking querys
+        #useful for stacking querys - LengthOverTwoHours doesn't exist now
         $this->film->pushCustom(new LengthOverTwoHours);
         return \Response::json($this->film->all());
 

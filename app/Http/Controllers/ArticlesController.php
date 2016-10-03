@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
@@ -7,32 +6,39 @@ use App\Http\Requests;
 use Illuminate\Database\Eloquent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
-use SuperModels\Repositories\ArticleRepository as Article;
-
+use Illuminate\Container\Container as App;
+use SuperModels\Repositories\Criteria\Articles\AuthorIsTeej;
+use SuperModels\Repositories\ArticleRepository as ArticleRepo;
+use Models\Article;
 
 class ArticlesController extends Controller
 {
     public $article;
 
-    public function __construct(Article $article)
+    public function __construct(ArticleRepo $articleRepo)
     {
-    	$this->article = $article;
+    	$this->article = $articleRepo;
     	header('content-type: application/json');
     }
 
-    public function index() {
+    public function all()
+    {
+        return view('articles.all');
+    }
+
+    public function index() 
+    {
         // $articles = \DB::select('select * from articles');
         // return view('articles.index', ['articles' => $articles]);
     
     header('content-type: application/json');
     header('Access-Control-Allow-Origin: *');
     header('Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, PATCH, DELETE');
-         $statusCode = 200;
-         // $response = [
-         //    'articles' => []
-         // ];
-         
-         $articles = $this->article->all();     
+             $statusCode = 200;
+
+             $this->article->pushCriteria(new AuthorIsTeej());
+             return \Response::json([
+            'articles' => $this->article->all()], $statusCode);
        
          // foreach($articles as $article) {
          //     $response['articles'][] = [ 
@@ -41,15 +47,33 @@ class ArticlesController extends Controller
          //        'title' =>  $article->title
          //    ];
          // }
-           return Response::json([
-            'articles'  => $articles->toArray()
-            ], $statusCode);   
+           // $articles = $this->article->all();     
+           // return Response::json([
+           //  'articles'  => $articles->toArray()
+           //  ], $statusCode);   
  
     }
 
-    public function show($id) {
+    public function show($id) 
+    {
         $article = $this->article->show($id);
 
         return view('articles.show', ['article' => $article]);
+    }
+
+    public function create()
+    {
+        return view('articles.create');
+    }
+
+    public function store(Request $request, App $app)
+    {
+        $title = $request->get('title');
+        $body = $request->get('body');
+        
+        $criteria = $request->all();
+        Article::create($criteria);
+
+        return view('articles.all', ['criteria' => $criteria, 'title' => $title, 'body' => $body]);
     }
 }
