@@ -18,12 +18,12 @@ class ArticlesController extends Controller
     public function __construct(ArticleRepo $articleRepo)
     {
     	$this->article = $articleRepo;
-    	header('content-type: application/json');
     }
 
     public function all()
     {
-        return view('articles.all');
+        $articles = Article::all();
+        return view('articles.all', ['articles' => $articles]);
     }
 
     public function index() 
@@ -56,7 +56,7 @@ class ArticlesController extends Controller
 
     public function show($id) 
     {
-        $article = $this->article->show($id);
+        $article = $this->article->find($id);
 
         return view('articles.show', ['article' => $article]);
     }
@@ -74,6 +74,6 @@ class ArticlesController extends Controller
         $criteria = $request->all();
         Article::create($criteria);
 
-        return view('articles.all', ['criteria' => $criteria, 'title' => $title, 'body' => $body]);
+        return redirect('allarticles');
     }
 }

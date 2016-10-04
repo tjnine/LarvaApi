@@ -5,7 +5,6 @@
 Route::get('/', ['as'=>'home', 'uses'=> 'PagesController@home']);
 #Route::get('articles/{id}', ['as' => 'article', 'uses' => 'ArticlesController@show']);
 Route::resource('articles', 'ArticlesController', ['names'=> [
-    'all' => 'article.all',
     'create' => 'article.buildForm',
     'store' => 'article.post',
     'destroy' => 'article.delete',
@@ -27,6 +26,7 @@ Route::resource('invitations', 'InvitationsController', ['names' => [
     'edit' => 'invitation.editForm'
     ]]);
 
+Route::get('allarticles', ['as'=> 'article.all', 'uses'=> 'ArticlesController@all']);
 Route::get('cards', ['as' => 'cards', 'uses' => 'CardsController@index']);
 Route::get('cards/{id}', ['as' => 'card', 'uses' => 'CardsController@show']);
 Route::post('cards/{id}/notes', ['uses'=>'NotesController@store']);

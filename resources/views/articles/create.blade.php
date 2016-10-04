@@ -3,7 +3,8 @@
 @section('content')
 
 {!! Form::open(['route'=>'article.post']) !!}
-
+ <input name="_token" hidden value="{!! csrf_token() !!}" />
+ 
 <div class="form-group">
     {!! Form::label('title', 'Title:') !!}
     {!! Form::text('title', null, ['class'=>'form-control']) !!}
